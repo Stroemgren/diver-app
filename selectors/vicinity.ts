@@ -16,6 +16,32 @@ export const vicinitySelector = (coordinate: ICoordinate) => {
     )
 }
 
+export const nearbySites = (coordinate: ICoordinate) => {
+    return createSelector(
+        sitesSelector, 
+        vicinitySelector(coordinate), 
+        (sites, vicinity): { distance: number, site: ISite }[] => {
+            return vicinity !== undefined 
+                ?  vicinity.locations
+                        .map(l => ({ distance: l.distance, site: sites[l.locationId] }))
+                        .filter(c => c.site !== undefined)
+                : [];
+        });
+}
+
+export const nearbyCenters = (coordinate: ICoordinate) => {
+    return createSelector(
+        centersSelector, 
+        vicinitySelector(coordinate), 
+        (centers, vicinity): { distance: number, center: ICenter }[] => {
+            return vicinity !== undefined 
+                ?  vicinity.locations
+                        .map(l => ({ distance: l.distance, center: centers[l.locationId] }))
+                        .filter(c => c.center !== undefined)
+                : [];
+        });
+}
+
 export const nearbyLocations = (coordinate: ICoordinate) => {
     return createSelector(
         vicinitySelector(coordinate),

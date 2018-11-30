@@ -6,13 +6,13 @@ import { WeatherSection } from '../../components/WeatherSection';
 import { ReadMoreText } from '../../components/ReadMoreText';
 import { styles } from './styles';
 import { NavigationScreenProp } from 'react-navigation';
-import { Title, Caption, SectionTitle } from '../../components/Typography';
+import { Title, Caption, SectionTitle, Headline, Display, Subtitle } from '../../components/Typography';
 import { Container } from '../../components/Container';
 import { requestVicinityForCoordinate } from '../../reducers/vicinity';
 import { RootState } from '../../reducers';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { nearbyCenters } from '../../selectors/centers';
+import { nearbyCenters } from '../../selectors/vicinity';
 import { ListItem } from '../../components/ListItem';
 import { ICenter, ISite } from 'divermodels';
 import { Icon } from 'react-native-elements';
@@ -39,7 +39,17 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<any, any, any>, props: SiteP
 }
 
 class Site extends React.Component<SiteProps> {
-    public index: number = 0;
+    static navigationOptions = (navigationOptions: any) => {
+        const navigation = navigationOptions.navigation;
+        
+        return navigation !== undefined ? {
+            headerStyle:{ backgroundColor: '#576FE8', border: 'none', shadowColor: 'transparent', borderBottomWidth: 0 },
+            headerLeft: (
+                <Icon onPress={() => {navigation.goBack()}} name={'clear'} color={'rgba(255, 255, 255, 0.87)'} iconStyle={{ paddingHorizontal: 20 }} />
+            )
+        } : {}
+    };
+
     constructor(props: SiteProps) {
         super(props);
     }
@@ -53,29 +63,20 @@ class Site extends React.Component<SiteProps> {
 
         return (
             <ScrollView style={styles.container}>
-                <MapView
-                    style={styles.map}
-                    initialRegion={{...site.coordinate, latitudeDelta: 0.05, longitudeDelta: 0.05}}
-                >
-                    <Marker 
-                        key={site.id}
-                        coordinate={site.coordinate}
-                        title={site.name}
-                    />
-                </MapView>
-                <Container>
-                    <Caption>{`${site.ocean}, ${site.country}`}</Caption>
-                    <Title>{site.name}</Title>
-                </Container>
-                <Container>
-                    <FactSheet smallLayout={false} diveSpot={site}></FactSheet>
+                <Container style={{backgroundColor: '#576FE8', paddingHorizontal: 0}}>
+                    <Container style={{marginBottom: 32, marginTop: 8}}>
+                        <Display theme={'light'}>{site.name}</Display>
+                        <Subtitle theme={'light'}>{`${site.ocean}, ${site.country}`}</Subtitle>
+                    </Container>
+                    <Container>
+                        <FactSheet smallLayout={false} diveSpot={site}></FactSheet>
+                    </Container>
                 </Container>
                 <Container>
                     {site.description && <ReadMoreText text={site.description}></ReadMoreText>}
                 </Container>
                 <Container style={{backgroundColor: '#eee', paddingTop: 24}}>
                     <Container style={{paddingHorizontal: 0}}>
-                        <SectionTitle style={{marginBottom: 24}}>Upcoming weather</SectionTitle>
                         <WeatherSection latitude={site.coordinate.latitude} longitude={site.coordinate.longitude}></WeatherSection>
                     </Container>
                 </Container>

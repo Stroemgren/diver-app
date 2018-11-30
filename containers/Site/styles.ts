@@ -10,7 +10,8 @@ interface Style {
 export const styles = StyleSheet.create<Style>({
     container: {
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        marginTop: 64
     },
     map: {
         height: 200,

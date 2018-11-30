@@ -24,31 +24,19 @@ export class Display extends React.Component<TextProps> {
     }
 }
 
-export class Headline extends React.Component {
-    render() {
-        return (
-            <Text style={{
-                color: 'rgba(0, 0, 0, 0.87)',
-                fontFamily: 'RobotoRegular',
-                fontSize: 24,
-                letterSpacing: 0 
-            }}>{this.props.children}</Text>
-        );
-    }
-}
-
-export class SectionTitle extends React.Component<TextProps> {
+export class Headline extends React.Component<TextProps> {
     constructor(props: TextProps) {
         super(props);
     }
 
     render() {
+        const theme = this.props.theme || 'dark';
         return (
             <Text style={[{
-                color: 'rgba(0, 0, 0, 0.87)',
-                fontFamily: 'RobotoMedium',
-                fontSize: 16,
-                letterSpacing: 0.25 
+                color: theme === 'dark' ? 'rgba(0, 0, 0, 0.87)' : 'rgba(255, 255, 255, 0.87)',
+                fontFamily: 'RobotoRegular',
+                fontSize: 24,
+                letterSpacing: 0 
             }, this.props.style || {}]}>{this.props.children}</Text>
         );
     }
@@ -85,6 +73,23 @@ export class Subtitle extends React.Component<TextProps> {
                 fontFamily: 'RobotoRegular',
                 fontSize: 16,
                 letterSpacing: 0.15
+            }, this.props.style || {}]}>{this.props.children}</Text>
+        );
+    }
+}
+
+export class SectionTitle extends React.Component<TextProps> {
+    constructor(props: TextProps) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <Text style={[{
+                color: 'rgba(0, 0, 0, 0.87)',
+                fontFamily: 'RobotoMedium',
+                fontSize: 16,
+                letterSpacing: 0.25 
             }, this.props.style || {}]}>{this.props.children}</Text>
         );
     }
