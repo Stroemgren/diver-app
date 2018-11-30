@@ -68,6 +68,7 @@ class Search extends React.Component<SearchProps> {
                         style={{fontFamily: 'RobotoMedium', fontSize: 28, color: 'rgba(255, 255, 255, 0.87)', marginBottom: 16}} 
                         value={this.props.searchTerm || undefined}
                         autoFocus={true}
+                        selectionColor={'#fff'}
                     />
                 </View>
                 <View style={{height: 1, backgroundColor: 'rgba(255, 255, 255, 0.87)'}}></View>

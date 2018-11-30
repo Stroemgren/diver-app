@@ -40,7 +40,7 @@ export const vicinityReducer = createReducer((on) => {
             ...state,
             [coordinateKey]: {
                 ...payload.vicinity,
-                locations:  state[coordinateKey] ? [...state[coordinateKey].locations, ...payload.vicinity.locations] : payload.vicinity.locations
+                locations: payload.vicinity.locations
             }
         }
     });

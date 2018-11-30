@@ -1,6 +1,6 @@
 import React, { createRef, RefObject } from 'react';
 import { View } from 'react-native';
-import MapView, { Marker, MapEvent, LatLng } from 'react-native-maps';
+import MapView, { Marker, MapEvent } from 'react-native-maps';
 import { NavigationScreenProp } from 'react-navigation';
 import { styles } from './styles';
 import { icons } from '../../icons';
@@ -12,18 +12,14 @@ import { RootState } from '../../reducers';
 import { ThunkDispatch } from 'redux-thunk';
 import { ISite, ICoordinate, ICenter } from 'divermodels';
 import { requestSites } from '../../reducers/sites';
-import { nearbySites } from '../../selectors/sites';
-import { nearbyCenters } from '../../selectors/centers';
 import { requestVicinityForCoordinate } from '../../reducers/vicinity';
 import { nearbyLocations } from '../../selectors/vicinity';
-import { LocationSearch } from '../../components/LocationSearch';
 import { CarouselCard } from '../../components/Cards/CarouselCard';
 import { Title } from '../../components/Typography';
 
 export interface MapProps {
     navigation: NavigationScreenProp<any, any>;
-    sites: ISite[];
-    centers: ICenter[];
+    locationId: string;
     locations: { type: 'site' | 'center', distance: number, item: ISite | ICenter }[];
     requestSites: () => void;
     requestVicinity: () => void;
@@ -33,8 +29,6 @@ const mapStateToProps = (state: RootState, props: MapProps) => {
     const coordinate: ICoordinate = props.navigation.getParam('coordinate');
 
     return { 
-        sites: nearbySites(coordinate)(state).map(n => n.site),
-        centers: nearbyCenters(coordinate)(state).map(n => n.center),
         locations: nearbyLocations(coordinate)(state)
     }; 
   }
@@ -52,45 +46,39 @@ class Map extends React.Component<MapProps> {
     private mapView: RefObject<MapView> = createRef();
     private cardCarousel: RefObject<CardCarousel> = createRef();
     private initialCoordinate: ICoordinate = this.props.navigation.getParam('coordinate', undefined);
-    private selectedLocation: ISite | ICenter = this.props.navigation.getParam('selectedLocation', undefined);
 
     public state: {
-        selectedSiteId: string | null;
+        selectedLocationId: string | null;
     }
 
     constructor(props: MapProps) {
         super(props);
-        this.state = { selectedSiteId: null }
-        console.log(this.initialCoordinate)
+        this.state = { selectedLocationId: null }
         this._selectLocation = this._selectLocation.bind(this);
     }
 
-    componentWillMount(){
-        this.props.requestSites();
+    componentWillMount() {
         this.props.requestVicinity();
     }
 
-    componentDidMount() {
-        if (this.selectedLocation !== undefined) {
-            const index = this.props.locations.findIndex(l => l.item.id === this.selectedLocation.id);
-            if (index) {
-                this._selectLocation(index, true)
-            }
+    getDerivedStateFromProps(nextProps: MapProps) {
+        if (nextProps.locationId && (nextProps.locationId !== this.props.locationId || nextProps.locations.length !== this.props.locations.length)) {
+            const index = nextProps.locations.findIndex(l => l.item.id === nextProps.locationId);
+            this._selectLocation(index, true);
         }
-        
     }
 
     _selectLocation(index: number, initializeZoom: boolean = false) {
-        const site = this.props.sites[index];
+        const location = this.props.locations[index];
         
-        if (site && this.mapView.current && this.cardCarousel.current) {
-            this.setState({selectedSiteId: site.id});
+        if (location && this.mapView.current && this.cardCarousel.current) {
+            this.setState({selectedLocationId: location.item.id});
             this.cardCarousel.current.moveToItem(index);
 
             if (initializeZoom) {
-                this.mapView.current.animateToRegion({...site.coordinate, latitudeDelta: 0.02, longitudeDelta: 0.02});
+                this.mapView.current.animateToRegion({...location.item.coordinate, latitudeDelta: 0.02, longitudeDelta: 0.02});
             } else {
-                this.mapView.current.animateToCoordinate(site.coordinate);
+                this.mapView.current.animateToCoordinate(location.item.coordinate);
             }
         }
     }
@@ -108,17 +96,7 @@ class Map extends React.Component<MapProps> {
                 >
                     <Title theme={'light'}>{l.item.name}</Title>
                 </CarouselCard>
-        })
-        /*
-        return sites.map(site => {
-            return (
-                <SiteCard
-                    site={site}
-                    onPress={() => {this.props.navigation.navigate('Site', {site: site})}}
-                />
-            )
         });
-        */
     }
 
     render() {
@@ -144,7 +122,8 @@ class Map extends React.Component<MapProps> {
                             identifier={location.item.id}
                             coordinate={location.item.coordinate}
                             onPress={(e: MapEvent) => this._selectLocation(index)}
-                            image={location.type === 'site' ? icons[`marker${this.state.selectedSiteId === location.item.id ? 'Selected' : ''}`] : icons[`centerMarker${this.state.selectedSiteId === location.item.id ? 'Selected' : ''}`]}
+                            title={location.item.name}
+                            image={location.type === 'site' ? icons[`marker${this.state.selectedLocationId === location.item.id ? 'Selected' : ''}`] : icons[`centerMarker${this.state.selectedLocationId === location.item.id ? 'Selected' : ''}`]}
                         />
                     )}
                     
